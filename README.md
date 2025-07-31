@@ -1113,3 +1113,4 @@ Below are **direct DEMAND BLOCKS** for **security, encryption, UX + back-end cou
 ---
 
 Use these blocks as-is. If you want, I can convert this into a formal spec document for handoff.
+\n## Quickstart\n\nRun `python src/bootstrap.py --data path/to/dataset.jsonl` to install dependencies, build embeddings, and launch the chat interface.
