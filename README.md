@@ -1113,12 +1113,14 @@ Below are **direct DEMAND BLOCKS** for **security, encryption, UX + back-end cou
 ---
 
 Use these blocks as-is. If you want, I can convert this into a formal spec document for handoff.
-\n## Quickstart\n\nRun `python src/bootstrap.py --data path/to/dataset.jsonl` to install dependencies, build embeddings, and launch the chat interface.
+\n## Quickstart\n\nRun `python src/bootstrap.py --data path/to/dataset.jsonl` to install dependencies, build embeddings, fine-tune the model, and launch the chat interface.
 
-To fine-tune the model run:
+To fine-tune the model separately run:
 
 `python src/train.py --data path/to/dataset.jsonl`
 
 To execute automated tasks from a list of instructions use:
 
 `python src/agent.py --instructions tasks.txt`
+
+Generated scripts are stored in `workspace/scripts` with a hash-based name to avoid duplicates, and execution logs are written to `workspace/logs`.

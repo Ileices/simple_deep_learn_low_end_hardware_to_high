@@ -17,6 +17,7 @@ def main():
 
     run(f'pip install -r {REQUIREMENTS}')
     run(f'python src/ingest.py --data {args.data}')
+    run(f'python src/train.py --data {args.data}')
     print('Starting chat interface...')
     run('python src/chat.py')
 
