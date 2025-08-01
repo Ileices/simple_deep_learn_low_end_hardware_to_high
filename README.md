@@ -1124,3 +1124,19 @@ To execute automated tasks from a list of instructions use:
 `python src/agent.py --instructions tasks.txt`
 
 Generated scripts are stored in `workspace/scripts` with a hash-based name to avoid duplicates, and execution logs are written to `workspace/logs`.
+
+### Distributed task example
+
+Start the hub with a list of shell commands:
+
+```bash
+python src/hub.py --tasks tasks.txt
+```
+
+Then launch one or more workers in separate terminals:
+
+```bash
+python src/worker.py --hub http://localhost:8000
+```
+
+Results can be viewed at `http://localhost:8000/results` once tasks complete.
