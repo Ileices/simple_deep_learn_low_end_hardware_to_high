@@ -5,8 +5,14 @@ import json
 import subprocess
 from pathlib import Path
 
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
-from peft import PeftModel
+# Heavy NLP libraries are optional. They are imported lazily so that utility
+# helpers like ``record_code`` remain usable in environments where the
+# dependencies are not available (e.g. during lightweight unit tests).
+try:  # pragma: no cover - exercised in integration environments
+    from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+    from peft import PeftModel
+except Exception:  # pragma: no cover
+    AutoModelForCausalLM = AutoTokenizer = pipeline = PeftModel = None
 
 
 WORKSPACE = Path('workspace')
@@ -58,6 +64,12 @@ def main():
     SCRIPTS.mkdir(parents=True, exist_ok=True)
     if not HISTORY.exists():
         HISTORY.write_text('task,attempt,returncode,script\n')
+
+    if AutoTokenizer is None or AutoModelForCausalLM is None or pipeline is None:
+        raise RuntimeError(
+            "transformers and peft are required to generate code; please install"
+            " the optional dependencies"
+        )
 
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     model = AutoModelForCausalLM.from_pretrained(args.model, device_map='auto')

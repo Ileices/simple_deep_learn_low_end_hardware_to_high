@@ -3,7 +3,12 @@ import json
 from pathlib import Path
 from typing import Any
 
-import faiss
+# ``faiss`` is an optional dependency. Import lazily so the module can be
+# imported in environments where the native library is unavailable.
+try:  # pragma: no cover
+    import faiss
+except Exception:  # pragma: no cover
+    faiss = None
 
 
 def read_dataset(path: Path):
@@ -23,7 +28,7 @@ def build_index(
     """Encode dataset texts and store them in a FAISS index."""
 
     if embed_model is None:
-        from sentence_transformers import SentenceTransformer
+        from sentence_transformers import SentenceTransformer  # type: ignore
 
         model = SentenceTransformer(model_name)
     else:
@@ -31,6 +36,10 @@ def build_index(
     texts = list(read_dataset(dataset_path))
     embeddings = model.encode(texts, batch_size=64, show_progress_bar=True)
     dim = embeddings.shape[1]
+    if faiss is None:
+        raise RuntimeError(
+            "faiss is required for indexing; please install the optional dependency"
+        )
     index = faiss.IndexFlatL2(dim)
     index.add(embeddings)
     faiss.write_index(index, str(index_path))
