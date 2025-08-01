@@ -22,6 +22,14 @@ This repository contains scripts for building a local agentic programming setup.
 
    Each cycle fine‑tunes the model and runs code‑generation tasks. Successful scripts are appended to the dataset for subsequent training rounds.
 
+3. **Run the training script manually (optional)**
+
+   ```bash
+   python src/train.py --data /path/to/dataset.jsonl --model mistralai/Mistral-7B-v0.1 --device cpu
+   ```
+
+   `--device` can be set to `cpu` for lightweight tests. Use `--lora-target` to override which layers receive LoRA adapters.
+
 3. **Distributed task execution (optional)**
 
    ```bash
