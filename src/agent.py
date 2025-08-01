@@ -1,4 +1,5 @@
 import argparse
+import ast
 import hashlib
 import json
 import subprocess
@@ -26,10 +27,19 @@ def run_code(path: Path) -> tuple[int, str]:
     return proc.returncode, proc.stderr
 
 
-def record_code(code: str, task_idx: int) -> Path:
-    h = hashlib.sha256(code.encode()).hexdigest()[:8]
-    path = SCRIPTS / f"task_{task_idx}_{h}.py"
-    path.write_text(code)
+def hash_code(code: str) -> str:
+    """Return a stable hash based on the code's AST structure."""
+    tree = ast.parse(code)
+    normalized = ast.dump(tree, annotate_fields=False, include_attributes=False)
+    return hashlib.sha256(normalized.encode()).hexdigest()
+
+
+def record_code(code: str) -> Path:
+    """Store ``code`` under a deterministic hash, avoiding duplicates."""
+    h = hash_code(code)[:16]
+    path = SCRIPTS / f"{h}.py"
+    if not path.exists():
+        path.write_text(code)
     return path
 
 
@@ -62,7 +72,7 @@ def main():
             prompt = f"Write a Python script to {task}. Only provide the code."\
                 + (f"\nPrevious error:\n{error}" if error else '')
             code = generate_code(gen, prompt)
-            script_path = record_code(code, idx)
+            script_path = record_code(code)
             rc, error = run_code(script_path)
             with HISTORY.open('a', encoding='utf-8') as log:
                 log.write(f"{idx},{attempt},{rc},{script_path.name}\n")
