@@ -1,4 +1,38 @@
 
+Autonomous Programming Environment
+=================================
+
+This repository contains scripts for building a local agentic programming setup. It can ingest a JSONL dataset, build a FAISS index, fine‑tune an open‑source model with LoRA, expose a retrieval‑augmented chat interface, and execute generated code automatically.
+
+## Quickstart
+
+1. **Bootstrap the environment**
+
+   ```bash
+   python src/bootstrap.py --data /path/to/dataset.jsonl
+   ```
+
+   Installs Python dependencies, builds embeddings, trains a LoRA adapter, and launches a Gradio chat powered by the fine‑tuned model.
+
+2. **Run a training and coding cycle**
+
+   ```bash
+   python src/loop.py --data /path/to/dataset.jsonl --tasks tests/sample_tasks.txt --cycles 1
+   ```
+
+   Each cycle fine‑tunes the model and runs code‑generation tasks. Successful scripts are appended to the dataset for subsequent training rounds.
+
+3. **Distributed task execution (optional)**
+
+   ```bash
+   python src/hub.py --tasks tests/sample_tasks.txt
+   python src/worker.py
+   ```
+
+   The hub distributes shell commands to polling workers.
+
+---
+
 > **"Set up a fully automated, self-hosted agentic programming environment on my local high-powered computer using free and open-source tools.**
 >
 > **This environment must:**

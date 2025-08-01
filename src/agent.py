@@ -1,9 +1,11 @@
 import argparse
 import hashlib
+import json
 import subprocess
 from pathlib import Path
 
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from peft import PeftModel
 
 
 WORKSPACE = Path('workspace')
@@ -36,6 +38,9 @@ def main():
     parser.add_argument('--instructions', type=Path, required=True,
                         help='Text file with one task per line')
     parser.add_argument('--model', default='mistralai/Mistral-7B-v0.1')
+    parser.add_argument('--lora', type=Path, help='Path to LoRA adapter weights')
+    parser.add_argument('--dataset-out', type=Path,
+                        help='Append successful tasks to this JSONL dataset')
     args = parser.parse_args()
 
     WORKSPACE.mkdir(exist_ok=True)
@@ -46,6 +51,8 @@ def main():
 
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     model = AutoModelForCausalLM.from_pretrained(args.model, device_map='auto')
+    if args.lora:
+        model = PeftModel.from_pretrained(model, args.lora)
     gen = pipeline('text-generation', model=model, tokenizer=tokenizer, device=0)
 
     tasks = [t.strip() for t in args.instructions.read_text().splitlines() if t.strip()]
@@ -61,6 +68,9 @@ def main():
                 log.write(f"{idx},{attempt},{rc},{script_path.name}\n")
             if rc == 0:
                 print(f'Task {idx} succeeded')
+                if args.dataset_out:
+                    with args.dataset_out.open('a', encoding='utf-8') as ds:
+                        ds.write(json.dumps({'prompt': task, 'response': code}) + '\n')
                 break
             else:
                 print(f'Task {idx} attempt {attempt+1} failed')
