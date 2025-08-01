@@ -1,10 +1,27 @@
 import argparse
 from pathlib import Path
 
-import faiss
+# ``faiss`` is an optional dependency. Import lazily so modules depending on
+# ``chat`` can still be imported without the native library present.
+try:  # pragma: no cover
+    import faiss  # type: ignore
+except Exception:  # pragma: no cover
+    faiss = None
 
 
 def load_index(index_path: Path):
+    """Load a FAISS index and associated text corpus.
+
+    Raises
+    ------
+    RuntimeError
+        If the ``faiss`` library is not available.
+    """
+
+    if faiss is None:  # pragma: no cover - exercised in unit tests
+        raise RuntimeError(
+            "faiss is required for search; please install the optional dependency"
+        )
     index = faiss.read_index(str(index_path))
     texts = (index_path.parent / 'texts.jsonl').read_text(encoding='utf-8').splitlines()
     return index, texts
