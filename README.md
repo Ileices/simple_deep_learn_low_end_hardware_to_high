@@ -1,4 +1,46 @@
 
+Autonomous Programming Environment
+=================================
+
+This repository contains scripts for building a local agentic programming setup. It can ingest a JSONL dataset, build a FAISS index, fine‑tune an open‑source model with LoRA, expose a retrieval‑augmented chat interface, and execute generated code automatically.
+
+## Quickstart
+
+1. **Bootstrap the environment**
+
+   ```bash
+   python src/bootstrap.py --data /path/to/dataset.jsonl
+   ```
+
+   Installs Python dependencies, builds embeddings, trains a LoRA adapter, and launches a Gradio chat powered by the fine‑tuned model.
+
+2. **Run a training and coding cycle**
+
+   ```bash
+   python src/loop.py --data /path/to/dataset.jsonl --tasks tests/sample_tasks.txt --cycles 1
+   ```
+
+   Each cycle fine‑tunes the model and runs code‑generation tasks. Successful scripts are appended to the dataset for subsequent training rounds.
+
+3. **Run the training script manually (optional)**
+
+   ```bash
+   python src/train.py --data /path/to/dataset.jsonl --model mistralai/Mistral-7B-v0.1 --device cpu
+   ```
+
+   `--device` can be set to `cpu` for lightweight tests. Use `--lora-target` to override which layers receive LoRA adapters.
+
+3. **Distributed task execution (optional)**
+
+   ```bash
+   python src/hub.py --tasks tests/sample_tasks.txt
+   python src/worker.py
+   ```
+
+   The hub distributes shell commands to polling workers.
+
+---
+
 > **"Set up a fully automated, self-hosted agentic programming environment on my local high-powered computer using free and open-source tools.**
 >
 > **This environment must:**
@@ -1113,3 +1155,30 @@ Below are **direct DEMAND BLOCKS** for **security, encryption, UX + back-end cou
 ---
 
 Use these blocks as-is. If you want, I can convert this into a formal spec document for handoff.
+\n## Quickstart\n\nRun `python src/bootstrap.py --data path/to/dataset.jsonl` to install all dependencies, build embeddings, fine-tune the model, and launch the chat interface with cited sources.
+
+To fine-tune the model separately run:
+
+`python src/train.py --data path/to/dataset.jsonl`
+
+To execute automated tasks from a list of instructions use:
+
+`python src/agent.py --instructions tasks.txt`
+
+Generated scripts are stored in `workspace/scripts` with a hash-based name to avoid duplicates, and execution logs are written to `workspace/logs`.
+
+### Distributed task example
+
+Start the hub with a list of shell commands:
+
+```bash
+python src/hub.py --tasks tasks.txt
+```
+
+Then launch one or more workers in separate terminals:
+
+```bash
+python src/worker.py --hub http://localhost:8000
+```
+
+Results can be viewed at `http://localhost:8000/results` once tasks complete.
