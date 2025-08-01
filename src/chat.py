@@ -1,11 +1,7 @@
 import argparse
-import json
 from pathlib import Path
 
 import faiss
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
-from sentence_transformers import SentenceTransformer
-import gradio as gr
 
 
 def load_index(index_path: Path):
@@ -16,7 +12,7 @@ def load_index(index_path: Path):
 
 def search(query: str, index, texts, embed_model, top_k: int = 5):
     vec = embed_model.encode([query])
-    distances, indices = index.search(vec, top_k)
+    _, indices = index.search(vec, top_k)
     return [texts[i] for i in indices[0]]
 
 
@@ -27,6 +23,10 @@ def main():
     args = parser.parse_args()
 
     index, texts = load_index(args.index)
+    from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+    from sentence_transformers import SentenceTransformer
+    import gradio as gr
+
     embed_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     model = AutoModelForCausalLM.from_pretrained(args.model, device_map='auto')

@@ -1,8 +1,8 @@
 import argparse
 import json
 from pathlib import Path
+from typing import Any
 
-from sentence_transformers import SentenceTransformer
 import faiss
 
 
@@ -14,8 +14,20 @@ def read_dataset(path: Path):
             yield text.strip()
 
 
-def build_index(dataset_path: Path, index_path: Path, model_name: str = 'sentence-transformers/all-MiniLM-L6-v2'):
-    model = SentenceTransformer(model_name)
+def build_index(
+    dataset_path: Path,
+    index_path: Path,
+    model_name: str = 'sentence-transformers/all-MiniLM-L6-v2',
+    embed_model: Any | None = None,
+):
+    """Encode dataset texts and store them in a FAISS index."""
+
+    if embed_model is None:
+        from sentence_transformers import SentenceTransformer
+
+        model = SentenceTransformer(model_name)
+    else:
+        model = embed_model
     texts = list(read_dataset(dataset_path))
     embeddings = model.encode(texts, batch_size=64, show_progress_bar=True)
     dim = embeddings.shape[1]
@@ -36,3 +48,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
